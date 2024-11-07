@@ -30,6 +30,11 @@ def main():
 
 def main_menu(screen):
 
+    engine_directory = os.listdir(FILE_PATH + "engines/")
+
+    engine_names = [x for x in engine_directory]
+    engine_files = [FILE_PATH + "engines/" + x for x in engine_directory]
+
     # Important Variables
     main_state = GameState()
     pv_state = GameState()
@@ -41,8 +46,10 @@ def main_menu(screen):
 
     screen_size = screen.get_size()
 
-    analysis_button = RectTextButton(LAYER_COLORS[5], (166, DETECT_BACKGROUND_RECT_2[1] + 42, 120, 30), False, 0, 0,
+    analysis_button = RectTextButton(LAYER_COLORS[5], (166, DETECT_BACKGROUND_RECT_2[1] + 42, 116, 30), False, 0, 0,
                        "toggle:analysis", "Analysis Off", LAYER_COLORS[6])
+    engine_switcher = RectTextButton(LAYER_COLORS[5], (292, DETECT_BACKGROUND_RECT_2[1] + 42, 116, 30), False, 0, 0,
+                       "toggle:engines", engine_names[0], LAYER_COLORS[6])
 
     buttons = [
         RectTextButton(LAYER_COLORS[5], (BOARD_PADDING, DETECT_BACKGROUND_RECT[1] + 6, 120, 30), False, 0, 0,
@@ -55,7 +62,8 @@ def main_menu(screen):
                        "toggle:continuous_detection", "Continuous Detection Off", LAYER_COLORS[6], 1.2),
         RectTextButton(WHITE_PERSPECTIVE_COLOR, (124, DETECT_BACKGROUND_RECT_2[1] + 42, 30, 30), True, 0, 0,
                        "toggle:perspective"),
-        analysis_button
+        analysis_button,
+        engine_switcher
 
     ]
 
@@ -93,13 +101,14 @@ def main_menu(screen):
     pv_state.default_square_size = PV_BOARD_SIZE[0] // 8
 
     # Engine
-    engine_files = os.listdir(FILE_PATH + "engines/")
 
-    engine_files = [FILE_PATH + "engines/" + x for x in engine_files]
-    engine_file = FILE_PATH + "engines/Alcor023"  # engine_files[0]
+    current_engine = 0
+    num_engines = len(engine_files)
+
+    starting_engine_file = engine_files[0]
 
     if PLATFORM == "Windows":
-        engine_file = FILE_PATH + "engines/Altair3.0.0_windows_64.exe"
+        starting_engine_file = FILE_PATH + "engines/Altair3.0.0_windows_64.exe"
     elif PLATFORM != "Darwin":
         print(PLATFORM + " NOT SUPPORTED")
         return -1
@@ -128,13 +137,11 @@ def main_menu(screen):
     basic_objects.append(nodes_panel)
     basic_objects.append(pv_panel)
 
-    engine = Engine(main_state, engine_file)
+    engine = Engine(main_state, starting_engine_file)
     engine_connection_thread = None
     continuous_detection_thread = None
 
     # Chess
-    continuous_moves = 0
-
     main_state.initialize_pieces()
     pv_state.initialize_pieces()
 
@@ -201,6 +208,21 @@ def main_menu(screen):
                                     engine_connection_thread = None
 
                             selected_object.update_text()
+
+                        if action[1] == "engines":
+                            current_engine = (current_engine + 1) % num_engines
+                            selected_object.text = engine_names[current_engine]
+                            selected_object.update_text()
+                            engine.engine_file = engine_files[current_engine]
+
+                            if analysis:
+                                engine.stop()
+                                if engine_connection_thread is not None:
+                                    engine_connection_thread.join()
+
+                                engine_connection_thread = threading.Thread(target=engine.connect, args=())
+                                engine_connection_thread.start()
+
                         if action[1] == "continuous_detection":
                             main_state.continuous_detection = not main_state.continuous_detection
 

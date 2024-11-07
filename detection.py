@@ -511,8 +511,9 @@ class Detector:
                         elif get_selected(move) == WHITE_ROOK or get_selected(move) == BLACK_ROOK:
                             rook_square = get_from_square(move)
 
-            assert(len(castling_moves) != 0)
-            assert(rook_square != 0)
+            if len(castling_moves) == 0 or rook_square == 0:
+                print("BIG CHANGES, POSITION LIKELY FLAWED")
+                return NO_MOVE
 
             if len(castling_moves) == 1:
                 return castling_moves[0]

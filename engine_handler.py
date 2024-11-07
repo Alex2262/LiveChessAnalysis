@@ -189,8 +189,9 @@ class Engine:
         self.hard_stop = False
         self.stopped = True
 
-        self.thread.join()
-        self.thread = None
+        if self.thread is not None:
+            self.thread.join()
+            self.thread = None
 
     def think(self, allocated_time):
 
