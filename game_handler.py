@@ -120,7 +120,7 @@ class GameState:
         selected_piece.move(target_col, target_row)
 
         if get_move_type(move) == MOVE_TYPE_PROMOTION:
-            selected_piece.piece = PIECE_MATCHER[promotion_piece]
+            selected_piece.piece = PIECE_MATCHER[promotion_piece % 6]
             selected_piece.image = pygame.Surface((selected_piece.width, selected_piece.height),
                                                   pygame.SRCALPHA).convert_alpha()
             selected_piece.unedited_sprite = pygame.image.load(

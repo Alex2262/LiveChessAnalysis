@@ -25,6 +25,8 @@ class Detector:
         self.square_size = 0
         self.square_margin_size = 0
 
+        self.interrupt_cont_detect = False
+
         self.light_square = 0
         self.dark_square = 0
         self.empty_error = 10
@@ -488,11 +490,9 @@ class Detector:
         if origin_square == -1:
             return NO_MOVE
 
-        # print(MAILBOX_TO_STANDARD[origin_square])
-
         if len(possible_origins) > 2:
             print("BIG CHANGES, POSITION LIKELY FLAWED")
-            return NO_MOVE
+            return None
 
         # Castle Handling
         # If two squares where pieces can move from are now empty, the move must have been castling, and the move
@@ -513,7 +513,7 @@ class Detector:
 
             if len(castling_moves) == 0 or rook_square == 0:
                 print("BIG CHANGES, POSITION LIKELY FLAWED")
-                return NO_MOVE
+                return None
 
             if len(castling_moves) == 1:
                 return castling_moves[0]
@@ -620,6 +620,10 @@ class Detector:
 
             # start = time.time()
             move = self.detect_move_change(main_state)
+            if move is None:
+                self.interrupt_cont_detect = True
+                return
+
             # print("CONTINUOUS DETECTION TIME:", time.time() - start)
 
             if move == NO_MOVE:

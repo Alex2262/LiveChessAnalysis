@@ -11,6 +11,7 @@ class Position:
         self.castle_ability_bits = 0
         self.ep_square = 0
         self.side = 0
+        self.cached_legal_moves = None
 
         self.parse_fen(START_FEN)
 
@@ -24,6 +25,7 @@ class Position:
         self.side = 0
 
     def parse_fen(self, fen_string):
+        self.cached_legal_moves = None
 
         fen_list = fen_string.strip().split()
 
@@ -101,6 +103,62 @@ class Position:
             self.side = 1
 
         return True
+
+    def get_fen(self):
+        fen = ""
+        empty = 0
+        for pos in STANDARD_TO_MAILBOX:
+            i = MAILBOX_TO_STANDARD[pos]
+
+            if i % 8 == 0 and i != 0:
+                if empty:
+                    fen += str(empty)
+                    empty = 0
+                fen += '/'
+
+            piece = self.board[pos]
+
+            if piece == EMPTY:
+                empty += 1
+                continue
+
+            if empty:
+                fen += str(empty)
+                empty = 0
+
+            new_piece = PIECE_MATCHER[piece % 6]
+            if piece >= BLACK_PAWN:
+                new_piece = new_piece.lower()
+
+            fen += new_piece
+
+        if empty:
+            fen += str(empty)
+
+        fen += " " + ("w" if self.side == WHITE_COLOR else "b") + " "
+
+        if self.castle_ability_bits == 0:
+            fen += "-"
+        else:
+            if (self.castle_ability_bits & 1) == 1:
+                fen += "K"
+            if (self.castle_ability_bits & 2) == 2:
+                fen += "Q"
+            if (self.castle_ability_bits & 4) == 4:
+                fen += "k"
+            if (self.castle_ability_bits & 8) == 8:
+                fen += "q"
+
+        fen += " "
+
+        if self.ep_square == 0:
+            fen += "-"
+        else:
+            standard_ep_square = MAILBOX_TO_STANDARD[self.ep_square]
+            num_ep_pos = [standard_ep_square // 8, standard_ep_square % 8]
+            fen += chr(num_ep_pos[1] + 97) + str(8 - num_ep_pos[0])
+
+        return fen
 
     def get_pseudo_legal_moves(self):
         moves = []
@@ -438,6 +496,8 @@ class Position:
         elif to_square == A8:
             self.castle_ability_bits &= ~(1 << 3)
 
+        self.cached_legal_moves = None
+
         return True
 
     def undo_move(self, move, current_ep, current_castle_ability_bits):
@@ -511,7 +571,12 @@ class Position:
         if selected == WHITE_KING or selected == BLACK_KING:
             self.king_positions[self.side] = from_square
 
+        self.cached_legal_moves = None
+
     def get_legal_moves(self):
+        if self.cached_legal_moves is not None:
+            return self.cached_legal_moves
+
         moves = self.get_pseudo_legal_moves()
         new_moves = []
 
@@ -522,6 +587,8 @@ class Position:
             if attempt:
                 new_moves.append(move)
             self.undo_move(move, current_ep, current_castle_ability_bits)
+
+        self.cached_legal_moves = new_moves
 
         return new_moves
 

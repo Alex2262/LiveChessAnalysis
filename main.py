@@ -51,6 +51,9 @@ def main_menu(screen):
     engine_switcher = RectTextButton(LAYER_COLORS[5], (292, DETECT_BACKGROUND_RECT_2[1] + 42, 116, 30), False, 0, 0,
                        "toggle:engines", engine_names[0], LAYER_COLORS[6])
 
+    cont_detect_button = RectTextButton(LAYER_COLORS[5], (216, DETECT_BACKGROUND_RECT_2[1] + 6, 192, 30), False, 0, 0,
+                       "toggle:continuous_detection", "Continuous Detection Off", LAYER_COLORS[6], 1.2)
+
     buttons = [
         RectTextButton(LAYER_COLORS[5], (BOARD_PADDING, DETECT_BACKGROUND_RECT[1] + 6, 120, 30), False, 0, 0,
                        "all:detect_board", "Detect Board", LAYER_COLORS[6]),
@@ -58,13 +61,11 @@ def main_menu(screen):
                        "all:detect_pieces", "Detect Pieces", LAYER_COLORS[6]),
         RectTextButton(LAYER_COLORS[5], (BOARD_PADDING, DETECT_BACKGROUND_RECT_2[1] + 6, 192, 30), False, 0, 0,
                        "all:detect_new", "Detect New Position", LAYER_COLORS[6]),
-        RectTextButton(LAYER_COLORS[5], (216, DETECT_BACKGROUND_RECT_2[1] + 6, 192, 30), False, 0, 0,
-                       "toggle:continuous_detection", "Continuous Detection Off", LAYER_COLORS[6], 1.2),
+        cont_detect_button,
         RectTextButton(WHITE_PERSPECTIVE_COLOR, (124, DETECT_BACKGROUND_RECT_2[1] + 42, 30, 30), True, 0, 0,
                        "toggle:perspective"),
         analysis_button,
         engine_switcher
-
     ]
 
     # eval_bar = EvalBar(LAYER2_COLOR, (20, 20, 40, 500), 0, 8)
@@ -362,6 +363,12 @@ def main_menu(screen):
 
                 # eval_bar.update_evaluation(engine.info["evaluation"] * (-1 if main_state.position.side == 1 else 1),
                 #                            engine.info["evaluation_type"])
+
+        if continuous_detection_thread is not None and detector.interrupt_cont_detect:
+            detector.interrupt_cont_detect = False
+            cont_detect_button.text = "Continuous Detection Off"
+            continuous_detection_thread.join()
+            continuous_detection_thread = None
 
         if len(main_state.current_moves) == 0:
             print("PLAYER LOST")
