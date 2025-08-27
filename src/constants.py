@@ -4,7 +4,7 @@ import os
 import platform
 
 PLATFORM = platform.system()
-FILE_PATH = os.path.dirname(__file__) + "/"
+FILE_PATH = os.path.dirname(__file__) + "/../"
 
 '''
 

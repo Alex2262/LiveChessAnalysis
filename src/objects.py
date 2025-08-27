@@ -50,7 +50,7 @@ class RectTextObject(RectObject):
 
         self.text_size = text_size
 
-        self.font = pygame.font.Font('Quicksand-Regular_afda0c4733e67d13c4b46e7985d6a9ce.ttf',
+        self.font = pygame.font.Font('fonts/Quicksand-Regular_afda0c4733e67d13c4b46e7985d6a9ce.ttf',
                                      int(self.text_size * min(self.width / (len(self.text) / 2), self.height) * 3 / 5))
 
         self.text_surf = self.font.render(self.text, True, self.text_color)
@@ -61,7 +61,7 @@ class RectTextObject(RectObject):
     def scale(self, screen_size):
         super().scale(screen_size)
 
-        self.font = pygame.font.Font('Quicksand-Regular_afda0c4733e67d13c4b46e7985d6a9ce.ttf',
+        self.font = pygame.font.Font('fonts/Quicksand-Regular_afda0c4733e67d13c4b46e7985d6a9ce.ttf',
                                      int(self.text_size * min(self.width / (len(self.text) / 2), self.height) * 3 / 5))
         self.text_surf = self.font.render(self.text, True, self.text_color)
 

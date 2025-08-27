@@ -52,7 +52,7 @@ class Detector:
         pyautogui_ss = pyautogui.screenshot()
         pyautogui_ss.save("board_detection_screenshot.png")
 
-        screenshot = cv2.imread('board_detection_screenshot.png')
+        screenshot = cv2.imread('../board_detection_screenshot.png')
         screenshot_grayscale = cv2.cvtColor(np.array(pyautogui_ss), cv2.COLOR_BGR2GRAY)
         screenshot_blur = cv2.GaussianBlur(screenshot_grayscale, (5, 5), 0)
 
@@ -182,7 +182,7 @@ class Detector:
         pyautogui_ss.save("piece_detection_screenshot.png")
 
         # load local screenshot
-        screenshot = cv2.imread('piece_detection_screenshot.png')
+        screenshot = cv2.imread('../piece_detection_screenshot.png')
         image_grayscale = cv2.cvtColor(np.array(pyautogui_ss), cv2.COLOR_BGR2GRAY)
 
         self.piece_grayscales = []
